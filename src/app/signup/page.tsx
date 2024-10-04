@@ -7,7 +7,7 @@ import { LuEye } from 'react-icons/lu';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 const Signup = () => {
   const [signUpData, setSignUpData] = useState({

@@ -30,8 +30,11 @@ const SignIn = () => {
 
       // Handle API response
       if (res.status === 200) {
-        localStorage.setItem('userToken', res.data.token)
-        localStorage.setItem('user', res.data.user)
+        const { token, user } = res.data.data;
+
+        localStorage.setItem('userToken', token);
+        localStorage.setItem('user', JSON.stringify((user)));
+        
         toast.success(res.data.message);
         setSignInData({
           email: "",
