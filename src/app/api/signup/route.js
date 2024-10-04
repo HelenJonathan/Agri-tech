@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import prisma from '../../../lib/prisma'; 
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: {
+    user: process.env.MAIL_ADDRESS,
+    pass: process.env.MAIL_PASSWORD,
+  },
+});
 
 export async function POST(req) {
   try {
@@ -20,6 +29,8 @@ export async function POST(req) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const verificationToken = await Math.floor(100000 + Math.random() * 900000);
+
     // Create the new user
     const newUser = await prisma.user.create({
       data: {
@@ -27,11 +38,23 @@ export async function POST(req) {
         email,
         password: hashedPassword,
         userType: userType || "buyer",
+        token: verificationToken,
       },
     });
 
+    // Send verification email
+    const mailOptions = {
+      from: process.env.MAIL_ADDRESS,
+      to: email,
+      subject: 'Your Verification Code',
+      html: `<h3>Your Agri-tech verification code is:</h3> <h1>${verificationToken}</h1>`, 
+    };
+
+    const sentMail = await transporter.sendMail(mailOptions);
+    console.log("Email Sent:", sentMail);
+
     // Return success response
-    return NextResponse.json({ message: 'User registered successfully!' }, { status: 201 });
+    return NextResponse.json({ message: 'User registered successfully!, Check your mail for verification' }, { status: 201 });
     
   } catch (error) {
     console.error('Error during signup:', error);
